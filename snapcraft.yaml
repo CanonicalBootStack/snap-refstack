@@ -1,0 +1,46 @@
+name: refstack 
+version: '1.3.0'
+summary: RefStack provides tools for the interoperability testing of OpenStack clouds
+description: |
+        RefStack provides users in the OpenStack community with a Tempest wrapper, 
+        refstack-client (included in the refstack-client snap), that helps to verify interoperability 
+        of their cloud with other OpenStack clouds. 
+        It does so by validating any cloud implementation against the OpenStack Tempest API tests.
+grade: stable
+confinement: strict 
+
+parts:
+  refstack-nodejs:
+    plugin: nodejs
+    source: https://github.com/openstack/refstack.git 
+    source-tag: '1.3.0'
+    node-packages:
+     - bower 
+  refstack-python:
+    plugin: python
+    python-version: python2
+    source: https://github.com/openstack/refstack.git
+    source-tag: '1.3.0' 
+    requirements: requirements.txt
+    build-packages:
+     - libssl-dev
+     - python-mysqldb
+  config-files:
+    plugin: copy
+    files:
+      conf/api.conf:             conf/api.conf
+      conf/ui.json:              conf/ui.json
+
+apps:
+  refstack-api:
+    daemon: simple
+    command: bin/refstack-api --env REFSTACK_OSLO_CONFIG=$SNAP_COMMON/api.conf
+    plugs:
+     - network
+     - network-bind 
+  refstack-manage:
+    command: bin/refstack-manage --config-file $SNAP_COMMON/api.conf
+    aliases:
+     - refstack-manage
+    plugs:
+     - network 
